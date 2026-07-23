@@ -113,11 +113,11 @@ sms-spam-classifier/
 
 ### 👤 About
 
-**[Your Name]**
+**Maryam Imam**
 
-[![GitHub](https://img.shields.io/badge/GitHub-your--username-181717?style=flat-square&logo=github)](https://github.com/your-username)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Your_Name-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/your-profile)
+[![GitHub](https://img.shields.io/badge/GitHub-maryamimambux-181717?style=flat-square&logo=github)](https://github.com/maryamimambux)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Maryam_Imam-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/maryam-imam-394455342/)
 
-*Built as a hands-on machine learning project — from raw text data to a live deployed app.*
+*Built as a hands-on machine learning project — from raw data to a live deployed app.*
 
 </div>
