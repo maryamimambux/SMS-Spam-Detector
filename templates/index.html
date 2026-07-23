@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Check — SMS Spam Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b1210;
+    --panel: #101b18;
+    --panel-border: #1e302b;
+    --signal: #4ce0a0;
+    --signal-dim: #2a7a5c;
+    --alert: #ff5f56;
+    --alert-dim: #7a2e2b;
+    --text: #eaf4f0;
+    --text-dim: #7d9691;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(76,224,160,0.08), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(255,95,86,0.05), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--display);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:48px 20px 80px;
+  }
+
+  .scope{
+    width:100%;
+    max-width:640px;
+  }
+
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:8px;
+    border-bottom:1px solid var(--panel-border);
+    padding-bottom:18px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--mono);
+    letter-spacing:0.08em;
+    font-size:13px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+  }
+  .brand .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 8px var(--signal);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1; transform:scale(1);}
+    50%{opacity:0.4; transform:scale(0.8);}
+  }
+  .brand-title{color:var(--text); font-weight:600;}
+
+  .project-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:22px;
+    padding:7px 14px 7px 12px;
+    border-radius:999px;
+    background:#132420;
+    border:1px solid var(--panel-border);
+    font-family:var(--mono);
+    font-size:11.5px;
+    font-weight:500;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--signal);
+  }
+  .project-badge svg{flex-shrink:0;}
+
+  h1{
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin:22px 0 6px;
+  }
+  .sub{
+    color:var(--text-dim);
+    font-size:15px;
+    margin:0 0 32px;
+    line-height:1.5;
+    max-width:50ch;
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:22px;
+  }
+
+  textarea{
+    width:100%;
+    min-height:130px;
+    background:#0a1512;
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:14.5px;
+    line-height:1.55;
+    padding:16px;
+    resize:vertical;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea::placeholder{color:#4a615b;}
+  textarea:focus{
+    border-color:var(--signal-dim);
+    box-shadow:0 0 0 3px rgba(76,224,160,0.12);
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .charcount{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+  }
+
+  .actions{
+    display:flex;
+    gap:10px;
+  }
+
+  button{
+    font-family:var(--display);
+    font-size:14.5px;
+    font-weight:600;
+    border-radius:9px;
+    padding:11px 20px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .1s ease, opacity .15s ease, background .15s ease;
+  }
+  button:active{transform:scale(0.97);}
+  button:disabled{opacity:0.5; cursor:not-allowed;}
+
+  .btn-primary{
+    background:var(--signal);
+    color:#04150e;
+  }
+  .btn-primary:hover:not(:disabled){background:#63e8b1;}
+
+  .btn-ghost{
+    background:transparent;
+    color:var(--text-dim);
+    border:1px solid var(--panel-border);
+  }
+  .btn-ghost:hover:not(:disabled){color:var(--text); border-color:#324941;}
+
+  .examples{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .example-chip{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    background:#0a1512;
+    border:1px solid var(--panel-border);
+    border-radius:20px;
+    padding:6px 12px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .example-chip:hover{border-color:var(--signal-dim); color:var(--text);}
+
+  /* Result */
+  .result{
+    margin-top:22px;
+    border-radius:14px;
+    border:1px solid var(--panel-border);
+    padding:24px;
+    display:none;
+  }
+  .result.show{display:block; animation:rise .25s ease;}
+  @keyframes rise{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .result.spam{
+    background:linear-gradient(180deg, rgba(255,95,86,0.08), transparent 60%);
+    border-color:var(--alert-dim);
+  }
+  .result.ham{
+    background:linear-gradient(180deg, rgba(76,224,160,0.08), transparent 60%);
+    border-color:var(--signal-dim);
+  }
+
+  .verdict-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .verdict-icon{
+    width:44px;height:44px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    flex-shrink:0;
+  }
+  .result.spam .verdict-icon{background:rgba(255,95,86,0.15); color:var(--alert);}
+  .result.ham .verdict-icon{background:rgba(76,224,160,0.15); color:var(--signal);}
+
+  .verdict-label{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .result.spam .verdict-label{color:var(--alert);}
+  .result.ham .verdict-label{color:var(--signal);}
+
+  .verdict-sub{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+
+  .meter{
+    margin-top:20px;
+  }
+  .meter-label{
+    display:flex;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .meter-track{
+    height:8px;
+    border-radius:5px;
+    background:#0a1512;
+    border:1px solid var(--panel-border);
+    overflow:hidden;
+  }
+  .meter-fill{
+    height:100%;
+    border-radius:5px;
+    width:0%;
+    transition:width .5s cubic-bezier(.22,1,.36,1);
+  }
+  .result.spam .meter-fill{background:linear-gradient(90deg, var(--alert-dim), var(--alert));}
+  .result.ham .meter-fill{background:linear-gradient(90deg, var(--signal-dim), var(--signal));}
+
+  .cleaned{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--panel-border);
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    line-height:1.6;
+    word-break:break-word;
+  }
+  .cleaned b{color:var(--text); font-weight:500;}
+
+  .error-msg{
+    margin-top:16px;
+    color:var(--alert);
+    font-family:var(--mono);
+    font-size:13px;
+    display:none;
+  }
+  .error-msg.show{display:block;}
+
+  footer{
+    margin-top:48px;
+    padding-top:22px;
+    border-top:1px solid var(--panel-border);
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#4a615b;
+    text-align:center;
+    line-height:1.8;
+  }
+  footer .footer-links{
+    margin-top:4px;
+  }
+  footer .footer-links a{
+    color:var(--text-dim);
+    text-decoration:none;
+    transition:color .15s ease;
+  }
+  footer .footer-links a:hover{
+    color:var(--signal);
+  }
+  footer .footer-sep{
+    color:#33463f;
+    margin:0 8px;
+  }
+
+  @media (max-width:480px){
+    h1{font-size:27px;}
+    .panel{padding:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="scope">
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="brand-title">Signal Check</span>
+    </div>
+    <div class="brand" style="letter-spacing:normal;">TF-IDF · Naive Bayes</div>
+  </header>
+
+  <div class="project-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2a4 4 0 0 0-4 4v1.05A5 5 0 0 0 4 12v1a4 4 0 0 0 0 8h16a4 4 0 0 0 0-8v-1a5 5 0 0 0-4-4.95V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="9" cy="13" r="1.2" fill="currentColor"/>
+      <circle cx="15" cy="13" r="1.2" fill="currentColor"/>
+    </svg>
+    Machine Learning Project
+  </div>
+
+  <h1>Is this text spam?</h1>
+  <p class="sub">Paste any SMS or message below. It runs through the same cleaning pipeline and Naive&nbsp;Bayes model trained on the SMS Spam Collection dataset.</p>
+
+  <div class="panel">
+    <textarea id="message" placeholder="e.g. Congratulations! You've won a $1000 Walmart gift card. Click here to claim now!!!" maxlength="1000"></textarea>
+    <div class="row">
+      <span class="charcount"><span id="charcount">0</span> / 1000</span>
+      <div class="actions">
+        <button class="btn-ghost" id="clearBtn" type="button">Clear</button>
+        <button class="btn-primary" id="checkBtn" type="button">Check message</button>
+      </div>
+    </div>
+
+    <div class="examples">
+      <span class="example-chip" data-text="Hey, are we still on for dinner tonight at 7?">"Hey, dinner tonight at 7?"</span>
+      <span class="example-chip" data-text="WINNER!! You have been selected to receive a £900 cash prize! Call 09061701461 now to claim.">"WINNER!! £900 cash prize..."</span>
+      <span class="example-chip" data-text="Can you pick up milk on your way home?">"Pick up milk?"</span>
+      <span class="example-chip" data-text="URGENT: Your account has been suspended. Verify now at bit.ly/xyz to avoid closure.">"URGENT: account suspended..."</span>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict-row">
+      <div class="verdict-icon" id="verdictIcon">!</div>
+      <div>
+        <div class="verdict-label" id="verdictLabel">—</div>
+        <div class="verdict-sub" id="verdictSub">—</div>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="meter-label">
+        <span>Model confidence</span>
+        <span id="confidenceValue">0%</span>
+      </div>
+      <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+    </div>
+
+    <div class="cleaned">
+      <b>Cleaned tokens fed to the model:</b><br>
+      <span id="cleanedText">—</span>
+    </div>
+  </div>
+
+  <footer>
+    <div>© 2026 Signal Check — SMS Spam Detector. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="https://github.com/your-username/your-repo" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <span class="footer-sep">·</span>
+      <a href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+const textarea = document.getElementById('message');
+const charcount = document.getElementById('charcount');
+const checkBtn = document.getElementById('checkBtn');
+const clearBtn = document.getElementById('clearBtn');
+const result = document.getElementById('result');
+const verdictIcon = document.getElementById('verdictIcon');
+const verdictLabel = document.getElementById('verdictLabel');
+const verdictSub = document.getElementById('verdictSub');
+const confidenceValue = document.getElementById('confidenceValue');
+const meterFill = document.getElementById('meterFill');
+const cleanedText = document.getElementById('cleanedText');
+const errorMsg = document.getElementById('errorMsg');
+
+textarea.addEventListener('input', () => {
+  charcount.textContent = textarea.value.length;
+});
+
+document.querySelectorAll('.example-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    textarea.value = chip.dataset.text;
+    charcount.textContent = textarea.value.length;
+    textarea.focus();
+  });
+});
+
+clearBtn.addEventListener('click', () => {
+  textarea.value = '';
+  charcount.textContent = '0';
+  result.classList.remove('show');
+  errorMsg.classList.remove('show');
+  textarea.focus();
+});
+
+async function checkMessage(){
+  const message = textarea.value.trim();
+  errorMsg.classList.remove('show');
+
+  if(!message){
+    errorMsg.textContent = 'Type or paste a message first.';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  checkBtn.disabled = true;
+  checkBtn.textContent = 'Checking…';
+
+  try{
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message})
+    });
+    const data = await res.json();
+
+    if(!res.ok){
+      throw new Error(data.error || 'Something went wrong.');
+    }
+
+    result.classList.remove('spam','ham');
+    result.classList.add(data.is_spam ? 'spam' : 'ham');
+    result.classList.add('show');
+
+    verdictIcon.textContent = data.is_spam ? '✕' : '✓';
+    verdictLabel.textContent = data.is_spam ? 'Spam detected' : 'Looks legitimate';
+    verdictSub.textContent = data.is_spam
+      ? 'This message shares patterns with known spam.'
+      : 'No strong spam signals found.';
+
+    confidenceValue.textContent = data.confidence + '%';
+    requestAnimationFrame(() => {
+      meterFill.style.width = data.confidence + '%';
+    });
+
+    cleanedText.textContent = data.cleaned_text ? data.cleaned_text : '(no meaningful tokens after cleaning)';
+
+  }catch(err){
+    errorMsg.textContent = err.message;
+    errorMsg.classList.add('show');
+    result.classList.remove('show');
+  }finally{
+    checkBtn.disabled = false;
+    checkBtn.textContent = 'Check message';
+  }
+}
+
+checkBtn.addEventListener('click', checkMessage);
+textarea.addEventListener('keydown', (e) => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
+    checkMessage();
+  }
+});
+</script>
+</body>
+</html>
